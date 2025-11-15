@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-
 dotenv.config();
 
 import { models, sequelize } from "./db/index";
@@ -10,51 +9,29 @@ const { Exercise, Program, User } = models;
 const seedDB = async () => {
   await sequelize.sync({ force: true });
 
-  await Program.bulkCreate([
-    {
-      name: "Program 1",
-    },
-    {
-      name: "Program 2",
-    },
-    {
-      name: "Program 3",
-    },
-  ]);
+  const programs = await Program.bulkCreate(
+    [{ name: "Program 1" }, { name: "Program 2" }, { name: "Program 3" }],
+    { returning: true },
+  );
 
-  await Exercise.bulkCreate([
-    {
-      name: "Exercise 1",
-      difficulty: EXERCISE_DIFFICULTY.EASY,
-      programID: 1,
-    },
-    {
-      name: "Exercise 2",
-      difficulty: EXERCISE_DIFFICULTY.EASY,
-      programID: 2,
-    },
-    {
-      name: "Exercise 3",
-      difficulty: EXERCISE_DIFFICULTY.MEDIUM,
-      programID: 1,
-    },
-    {
-      name: "Exercise 4",
-      difficulty: EXERCISE_DIFFICULTY.MEDIUM,
-      programID: 2,
-    },
-    {
-      name: "Exercise 5",
-      difficulty: EXERCISE_DIFFICULTY.HARD,
-      programID: 1,
-    },
-    {
-      name: "Exercise 6",
-      difficulty: EXERCISE_DIFFICULTY.HARD,
-      programID: 2,
-    },
-  ]);
+  // Create exercises
+  const exercises = await Exercise.bulkCreate(
+    [
+      { name: "Exercise 1", difficulty: EXERCISE_DIFFICULTY.EASY },
+      { name: "Exercise 2", difficulty: EXERCISE_DIFFICULTY.EASY },
+      { name: "Exercise 3", difficulty: EXERCISE_DIFFICULTY.MEDIUM },
+      { name: "Exercise 4", difficulty: EXERCISE_DIFFICULTY.MEDIUM },
+      { name: "Exercise 5", difficulty: EXERCISE_DIFFICULTY.HARD },
+      { name: "Exercise 6", difficulty: EXERCISE_DIFFICULTY.HARD },
+    ],
+    { returning: true },
+  );
 
+  await programs[0].addExercises([exercises[0], exercises[2], exercises[4]]);
+  await programs[1].addExercises([exercises[1], exercises[3], exercises[5]]);
+  await programs[2].addExercises([]);
+
+  // Create users
   await User.bulkCreate(
     [
       {
@@ -76,7 +53,7 @@ const seedDB = async () => {
         password: "password123",
       },
     ],
-    { individualHooks: true },
+    { individualHooks: true }, // hash passwords
   );
 };
 
@@ -86,6 +63,6 @@ seedDB()
     process.exit(0);
   })
   .catch((err) => {
-    console.error("error in seed, check your data and model \n \n", err);
+    console.error("Error in seed, check your data and model\n", err);
     process.exit(1);
   });

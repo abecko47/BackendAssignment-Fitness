@@ -42,8 +42,21 @@ export default () => {
         const exercise = await Exercise.create({
           name,
           difficulty,
-          programID,
         });
+
+        if (programID) {
+          const programToAssign = await Program.findByPk(programID);
+          await exercise.addPrograms(programID);
+
+          const exerciseWithPrograms = await Exercise.findByPk(exercise.id, {
+            include: [Program],
+          });
+
+          res.status(200).json({
+            message: "Successfully created exercise",
+            data: exerciseWithPrograms,
+          });
+        }
 
         // status 200, because I return resource straight away
         res.status(200).json({
@@ -68,13 +81,12 @@ export default () => {
     async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
       try {
         const { id } = req.params;
-        const { name, difficulty, programID } = req.body;
+        const { name, difficulty } = req.body;
 
         const [affectedRows, rows] = await Exercise.update(
           {
             ...(name && { name }),
             ...(difficulty && { difficulty }),
-            ...(programID && { programID }),
           },
           { where: { id }, returning: true },
         );
@@ -99,7 +111,6 @@ export default () => {
     },
   );
 
-  // DELETE /exercises/:id - Delete exercise (ADMIN only)
   router.delete(
     "/:id",
     authenticate,

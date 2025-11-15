@@ -1,4 +1,10 @@
-import { Sequelize, DataTypes, Model } from "sequelize";
+import {
+  Sequelize,
+  DataTypes,
+  Model,
+  BelongsToManyRemoveAssociationsMixin,
+  BelongsToManyAddAssociationsMixin,
+} from "sequelize";
 import { EXERCISE_DIFFICULTY } from "../utils/enums";
 import { ExerciseModel } from "./exercise";
 
@@ -8,6 +14,9 @@ export interface ProgramModel extends Model {
   name: string;
 
   exercises: ExerciseModel[];
+
+  addExercises: BelongsToManyAddAssociationsMixin<ExerciseModel, number>;
+  removeExercises: BelongsToManyRemoveAssociationsMixin<ExerciseModel, number>;
 }
 
 export default (sequelize: Sequelize, modelName: string) => {
@@ -32,11 +41,10 @@ export default (sequelize: Sequelize, modelName: string) => {
   );
 
   ProgramModelCtor.associate = (models) => {
-    ProgramModelCtor.hasMany(models.Exercise, {
-      foreignKey: {
-        name: "programID",
-        allowNull: false,
-      },
+    ProgramModelCtor.belongsToMany(models.Exercise, {
+      through: models.ProgramExercises,
+      foreignKey: "programID",
+      otherKey: "exerciseID",
     });
   };
 
