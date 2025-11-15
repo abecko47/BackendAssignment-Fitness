@@ -7,11 +7,14 @@ dotenv.config();
 import { sequelize } from "./db";
 import ProgramRouter from "./routes/programs";
 import ExerciseRouter from "./routes/exercises";
+import AuthRouter from "./routes/auth";
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use("/auth", AuthRouter());
 app.use("/programs", ProgramRouter());
 app.use("/exercises", ExerciseRouter());
 

@@ -1,7 +1,11 @@
-import { models, sequelize } from "./db/index";
-import { EXERCISE_DIFFICULTY } from "./utils/enums";
+import dotenv from "dotenv";
 
-const { Exercise, Program } = models;
+dotenv.config();
+
+import { models, sequelize } from "./db/index";
+import { EXERCISE_DIFFICULTY, USER_ROLE } from "./utils/enums";
+
+const { Exercise, Program, User } = models;
 
 const seedDB = async () => {
   await sequelize.sync({ force: true });
@@ -48,6 +52,27 @@ const seedDB = async () => {
       name: "Exercise 6",
       difficulty: EXERCISE_DIFFICULTY.HARD,
       programID: 2,
+    },
+  ]);
+
+  await User.bulkCreate([
+    {
+      name: "John",
+      surname: "Admin",
+      nickName: "johnadmin",
+      email: "john.admin@example.com",
+      age: 30,
+      role: USER_ROLE.ADMIN,
+      password: "password123",
+    },
+    {
+      name: "John",
+      surname: "User",
+      nickName: "johnuser",
+      email: "john.user@example.com",
+      age: 25,
+      role: USER_ROLE.USER,
+      password: "password123",
     },
   ]);
 };
