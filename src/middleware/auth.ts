@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import passport from "./passport";
+import { RequestHandler } from "express";
+
 import { USER_ROLE } from "../utils/enums";
+import { UserModel } from "../db/user";
 
 export const authenticate = (
   req: Request,
@@ -21,16 +24,18 @@ export const authenticate = (
   })(req, res, next);
 };
 
-export const authorize = (...roles: USER_ROLE[]) => {
+export const authorize = (...roles: USER_ROLE[]): RequestHandler => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user) {
-      return res.status(401).json({ error: "Unauthorized" });
+    const requestUser = req.user as UserModel;
+
+    if (!requestUser) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
 
-    if (!roles.includes(req.user.role)) {
-      return res
-        .status(403)
-        .json({ error: "Forbidden - Insufficient permissions" });
+    if (!roles.includes(requestUser.role)) {
+      res.status(403).json({ error: "Forbidden - Insufficient permissions" });
+      return;
     }
 
     next();
