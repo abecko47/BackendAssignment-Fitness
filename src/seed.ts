@@ -55,26 +55,29 @@ const seedDB = async () => {
     },
   ]);
 
-  await User.bulkCreate([
-    {
-      name: "John",
-      surname: "Admin",
-      nickName: "johnadmin",
-      email: "john.admin@example.com",
-      age: 30,
-      role: USER_ROLE.ADMIN,
-      password: "password123",
-    },
-    {
-      name: "John",
-      surname: "User",
-      nickName: "johnuser",
-      email: "john.user@example.com",
-      age: 25,
-      role: USER_ROLE.USER,
-      password: "password123",
-    },
-  ]);
+  await User.bulkCreate(
+    [
+      {
+        name: "John",
+        surname: "Admin",
+        nickName: "johnadmin",
+        email: "john.admin@example.com",
+        age: 30,
+        role: USER_ROLE.ADMIN,
+        password: "password123",
+      },
+      {
+        name: "John",
+        surname: "User",
+        nickName: "johnuser",
+        email: "john.user@example.com",
+        age: 25,
+        role: USER_ROLE.USER,
+        password: "password123",
+      },
+    ],
+    { individualHooks: true },
+  );
 };
 
 seedDB()
