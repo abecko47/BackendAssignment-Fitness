@@ -2,7 +2,7 @@ import { Sequelize, DataTypes, Model } from 'sequelize'
 import bcrypt from 'bcrypt'
 import { USER_ROLE } from '../utils/enums'
 
-export class User extends Model {
+export class UserModel extends Model {
   declare id: number
   declare name: string
   declare surname: string
@@ -18,7 +18,7 @@ export class User extends Model {
 }
 
 export default (sequelize: Sequelize, modelName: string) => {
-  return User.init(
+  return UserModel.init(
     {
       id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
       name: { type: DataTypes.STRING(200), allowNull: false },
@@ -45,10 +45,10 @@ export default (sequelize: Sequelize, modelName: string) => {
       paranoid: true,
       timestamps: true,
       hooks: {
-        beforeCreate: async (user: User) => {
+        beforeCreate: async (user: UserModel) => {
           user.password = await bcrypt.hash(user.password, 10)
         },
-        beforeUpdate: async (user: User) => {
+        beforeUpdate: async (user: UserModel) => {
           if (user.changed('password')) {
             user.password = await bcrypt.hash(user.password, 10)
           }
@@ -56,6 +56,4 @@ export default (sequelize: Sequelize, modelName: string) => {
       },
     }
   )
-
-  return User
 }

@@ -9,6 +9,7 @@ import {
 } from 'sequelize/types/model'
 
 import { Models } from '../../db'
+import { UserModel } from '../../db/user'
 
 declare module 'sequelize' {
 	interface IModels extends Models {}
@@ -29,5 +30,13 @@ declare module 'sequelize' {
 	export class QueryInterface extends OriginalQueryInterface {
 		// NOTE: redeclare sequelize property to ours overridden sequelize type, since it it not done automatically
 		public sequelize: Sequelize
+	}
+}
+
+declare global {
+	namespace Express {
+		interface Request {
+			user?: UserModel
+		}
 	}
 }
