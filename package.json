@@ -9,6 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "cross-env TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node -r ts-node/register src/index.ts",
+    "dev": "cross-env TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true nodemon -r ts-node/register src/index.ts",
     "seed": "cross-env TS_NODE_FILES=true TS_NODE_TRANSPILE_ONLY=true node -r ts-node/register src/seed.ts",
     "lint": "echo \"Error: no lint specified\" && exit 1",
     "type-check": "echo \"Error: no check specified\" && exit 1"
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^22.15.30",
-    "@types/validator": "^13.15.1"
+    "@types/validator": "^13.15.1",
+    "nodemon": "^3.1.0"
   }
 }
