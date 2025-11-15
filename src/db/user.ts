@@ -1,19 +1,19 @@
-import { Sequelize, DataTypes, Model } from 'sequelize'
-import bcrypt from 'bcrypt'
-import { USER_ROLE } from '../utils/enums'
+import { Sequelize, DataTypes, Model } from "sequelize";
+import bcrypt from "bcrypt";
+import { USER_ROLE } from "../utils/enums";
 
 export class UserModel extends Model {
-  declare id: number
-  declare name: string
-  declare surname: string
-  declare nickName: string
-  declare email: string
-  declare age: number
-  declare role: USER_ROLE
-  declare password: string
+  declare id: number;
+  declare name: string;
+  declare surname: string;
+  declare nickName: string;
+  declare email: string;
+  declare age: number;
+  declare role: USER_ROLE;
+  declare password: string;
 
   async comparePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.password)
+    return bcrypt.compare(password, this.password);
   }
 }
 
@@ -41,19 +41,19 @@ export default (sequelize: Sequelize, modelName: string) => {
     {
       sequelize,
       modelName,
-      tableName: 'users',
+      tableName: "users",
       paranoid: true,
       timestamps: true,
       hooks: {
         beforeCreate: async (user: UserModel) => {
-          user.password = await bcrypt.hash(user.password, 10)
+          user.password = await bcrypt.hash(user.password, 10);
         },
         beforeUpdate: async (user: UserModel) => {
-          if (user.changed('password')) {
-            user.password = await bcrypt.hash(user.password, 10)
+          if (user.changed("password")) {
+            user.password = await bcrypt.hash(user.password, 10);
           }
         },
       },
-    }
-  )
-}
+    },
+  );
+};
