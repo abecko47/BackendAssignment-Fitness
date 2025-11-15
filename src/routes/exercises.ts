@@ -45,15 +45,84 @@ export default () => {
           programID,
         });
 
+        // status 200, because I return resource straight away
         res.status(200).json({
           message: "Successfully created exercise",
           data: {
-            ...exercise.dataValues
+            ...exercise.dataValues,
           },
         });
       } catch (error) {
         res.status(500).json({
           error: "Failed to create exercise",
+          details: error.message,
+        });
+      }
+    },
+  );
+
+  router.put(
+    "/:id",
+    authenticate,
+    authorize(USER_ROLE.ADMIN),
+    async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+      try {
+        const { id } = req.params;
+        const { name, difficulty, programID } = req.body;
+
+        const [affectedRows, rows] = await Exercise.update(
+          {
+            ...(name && { name }),
+            ...(difficulty && { difficulty }),
+            ...(programID && { programID }),
+          },
+          { where: { id }, returning: true },
+        );
+
+        if (!affectedRows) {
+          res.status(404).json({ error: "Exercise not found" });
+        }
+
+        res.json({
+          data: {
+            ...rows[0].dataValues,
+          },
+          message: "Exercise updated successfully",
+        });
+      } catch (error: any) {
+        console.error("Update exercise error:", error);
+        res.status(500).json({
+          error: "Failed to update exercise",
+          details: error.message,
+        });
+      }
+    },
+  );
+
+  // DELETE /exercises/:id - Delete exercise (ADMIN only)
+  router.delete(
+    "/:id",
+    authenticate,
+    authorize(USER_ROLE.ADMIN),
+    async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
+      try {
+        const { id } = req.params;
+
+        const exercise = await Exercise.destroy({
+          where: { id },
+        });
+
+        if (!exercise) {
+          res.status(404).json({ error: "Exercise not found" });
+        }
+
+        res.json({
+          message: "Exercise deleted successfully",
+        });
+      } catch (error: any) {
+        console.error("Delete exercise error:", error);
+        res.status(500).json({
+          error: "Failed to delete exercise",
           details: error.message,
         });
       }
