@@ -1,5 +1,8 @@
 import http from 'http'
 import express from 'express'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 import { sequelize } from './db'
 import ProgramRouter from './routes/programs'
