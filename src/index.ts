@@ -1,6 +1,9 @@
 import http from "http";
 import express from "express";
 import dotenv from "dotenv";
+import middleware from "i18next-http-middleware";
+import i18next from "i18next";
+import Backend from "i18next-fs-backend";
 
 dotenv.config();
 
@@ -11,10 +14,28 @@ import AuthRouter from "./routes/auth";
 import UserRouter from "./routes/users";
 import AdminRouter from "./routes/admin";
 
+i18next
+  .use(Backend)
+  .use(middleware.LanguageDetector)
+  .init({
+    fallbackLng: "en",
+    preload: ["en", "sk"],
+    backend: {
+      loadPath: __dirname + "/locales/{{lng}}/{{ns}}.json",
+    },
+    detection: {
+      order: ["header"],
+      lookupHeader: "language",
+      caches: false,
+    },
+  });
+
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use(middleware.handle(i18next));
 
 app.use("/admin", AdminRouter());
 

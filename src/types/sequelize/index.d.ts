@@ -7,6 +7,7 @@ import {
   ModelOptions,
   Attributes,
 } from "sequelize/types/model";
+import { TFunction } from "i18next";
 
 import { Models } from "../../db";
 import { UserModel } from "../../db/user";
@@ -40,6 +41,7 @@ declare global {
     interface User extends UserModel {}
     interface Request {
       user?: UserModel;
+      t: TFunction;
     }
   }
 }

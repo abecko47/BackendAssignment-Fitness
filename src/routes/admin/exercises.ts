@@ -45,7 +45,7 @@ export default () => {
           });
 
           res.status(200).json({
-            message: "Successfully created exercise",
+            message: _req.t("exerciseCreated"),
             data: exerciseWithPrograms,
           });
           return;
@@ -53,7 +53,7 @@ export default () => {
 
         // status 200, because I return resource straight away
         res.status(200).json({
-          message: "Successfully created exercise",
+          message: _req.t("exerciseCreated"),
           data: {
             ...exercise.dataValues,
           },
