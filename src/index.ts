@@ -9,14 +9,15 @@ import ProgramRouter from "./routes/programs";
 import ExerciseRouter from "./routes/exercises";
 import AuthRouter from "./routes/auth";
 import UserRouter from "./routes/users";
-import { sanitizeResponse } from "./middleware/sanitizeResponse";
+import AdminRouter from "./routes/admin";
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use(sanitizeResponse);
+app.use("/admin", AdminRouter());
+
 app.use("/auth", AuthRouter());
 app.use("/programs", ProgramRouter());
 app.use("/exercises", ExerciseRouter());

@@ -3,6 +3,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { models } from "../db";
 import { authenticate, authorize } from "../middleware/auth";
 import { USER_ROLE } from "../utils/enums";
+import { UserModel } from "../db/user";
 
 const router = Router();
 
@@ -20,8 +21,8 @@ export default () => {
         res.json({
           message: "List of all users",
           data: users.map((user) => ({
-            ...user.dataValues,
-            password: undefined,
+            id: user.dataValues.id,
+            nickName: user.dataValues.nickName,
           })),
         });
       } catch (error: any) {
@@ -34,70 +35,24 @@ export default () => {
   );
 
   router.get(
-    "/:id",
+    "/me",
     authenticate,
     authorize(USER_ROLE.ADMIN, USER_ROLE.USER),
-    async (req: Request, res: Response): Promise<void> => {
+    async (_req: Request, res: Response): Promise<void> => {
       try {
-        const { id } = req.params;
-
-        const user = await User.findByPk(id);
+        const user = _req.user;
 
         if (!user) {
-          res.status(404).json({ error: "User not found" });
-          return;
+          res.status(401).json({ error: "Unauthorized" });
         }
 
         res.json({
-          message: "User details",
-          data: {
-            ...user.dataValues,
-            password: undefined,
-          },
+          message: "Me",
+          data: user,
         });
       } catch (error: any) {
         res.status(500).json({
-          error: "Failed to fetch user",
-          details: error.message,
-        });
-      }
-    },
-  );
-
-  router.put(
-    "/:id",
-    authenticate,
-    authorize(USER_ROLE.ADMIN),
-    async (req: Request, res: Response): Promise<void> => {
-      try {
-        const { id } = req.params;
-        const { name, surname, nickName, age, role } = req.body;
-
-        const user = await User.findByPk(id);
-
-        if (!user) {
-          res.status(404).json({ error: "User not found" });
-          return;
-        }
-
-        await user.update({
-          ...(name && { name }),
-          ...(surname && { surname }),
-          ...(nickName && { nickName }),
-          ...(age && { age }),
-          ...(role && { role }),
-        });
-
-        res.json({
-          message: "User updated successfully",
-          data: {
-            ...user,
-            password: undefined,
-          },
-        });
-      } catch (error: any) {
-        res.status(500).json({
-          error: "Failed to update user",
+          error: "Failed to fetch users",
           details: error.message,
         });
       }
