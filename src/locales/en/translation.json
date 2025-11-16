@@ -1,6 +1,8 @@
 {
     "exerciseCreated": "Exercise created successfully",
     "exerciseUpdated": "Exercise updated successfully",
-    "programCreated": "Program created successfully"
-  }
+    "programCreated": "Program created successfully",
+    "notFound": "Not Found",
+    "somethingWentWrong": "Something Went Wrong"
+}
   

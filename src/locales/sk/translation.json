@@ -1,6 +1,8 @@
 {
     "exerciseCreated": "Cvičenie bolo úspešne vytvorené",
     "exerciseUpdated": "Cvičenie bolo úspešne aktualizované",
-    "programCreated": "Program bol úspešne vytvorený"
-  }
+    "programCreated": "Program bol úspešne vytvorený",
+    "notFound": "Nenájdené",
+    "somethingWentWrong": "Niečo sa pokazilo"
+}
   

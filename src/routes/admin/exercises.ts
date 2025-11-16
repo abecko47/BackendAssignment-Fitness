@@ -59,9 +59,10 @@ export default () => {
           },
         });
       } catch (error) {
-        res.status(500).json({
-          error: "Failed to create exercise",
-          details: error.message,
+        _next({
+          status: 500,
+          message: "Failed to create exercise",
+          error,
         });
       }
     },
@@ -85,7 +86,10 @@ export default () => {
         );
 
         if (!affectedRows) {
-          res.status(404).json({ error: "Exercise not found" });
+          _next({
+            status: 404,
+            message: "notFound",
+          });
           return;
         }
 
@@ -96,10 +100,10 @@ export default () => {
           message: "Exercise updated successfully",
         });
       } catch (error: any) {
-        console.error("Update exercise error:", error);
-        res.status(500).json({
-          error: "Failed to update exercise",
-          details: error.message,
+        _next({
+          status: 500,
+          message: "Failed to update exercise",
+          error,
         });
       }
     },
@@ -117,7 +121,10 @@ export default () => {
         });
 
         if (!exercise) {
-          res.status(404).json({ error: "Exercise not found" });
+          _next({
+            status: 404,
+            message: "notFound",
+          });
           return;
         }
 
@@ -125,10 +132,10 @@ export default () => {
           message: "Exercise deleted successfully",
         });
       } catch (error: any) {
-        console.error("Delete exercise error:", error);
-        res.status(500).json({
-          error: "Failed to delete exercise",
-          details: error.message,
+        _next({
+          status: 500,
+          message: "Failed to delete exercise",
+          error,
         });
       }
     },

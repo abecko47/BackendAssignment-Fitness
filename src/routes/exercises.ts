@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { Op, literal, fn, col } from "sequelize";
+import { Op, col } from "sequelize";
 
 import { models, sequelize } from "../db";
 import z from "zod";
@@ -38,9 +38,7 @@ export default () => {
       const searchString = _req.query.search as string | undefined;
 
       if (searchString) {
-        // Full-text search using Postgres tsquery
         whereClause[Op.and] = sequelize.where(
-          // Use `col` to reference the column in the main table
           col("searchVector"),
           "@@",
           sequelize.fn("to_tsquery", "english", `${searchString}:*`),

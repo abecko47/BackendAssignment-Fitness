@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { z } from "zod";
 
 import { models } from "../db";
@@ -20,7 +20,6 @@ const registerSchema = z.object({
 });
 
 const loginSchema = z.object({
-  name: z.string().min(1),
   email: z.email().min(1),
   password: z.string().min(1),
 });
@@ -29,18 +28,10 @@ export default () => {
   router.post(
     "/register",
     validate(registerSchema, "body"),
-    async (req: Request, res: Response): Promise<any> => {
+    async (_req: Request, res: Response, _next: NextFunction) => {
       try {
         const { name, surname, nickName, email, age, password, role } =
-          req.body;
-
-        // Validation - add later proper validation from bonus task
-        if (!name || !surname || !nickName || !email || !age || !password) {
-          return res.status(400).json({
-            error:
-              "Missing required fields: name, surname, nickName, email, age, password",
-          });
-        }
+          _req.body;
 
         const user = await User.create({
           name,
@@ -60,7 +51,7 @@ export default () => {
 
         const { password: _, ...userWithoutPassword } = user.toJSON();
 
-        return res.status(201).json({
+        res.status(201).json({
           message: "User registered successfully",
           data: {
             user: userWithoutPassword,
@@ -68,11 +59,10 @@ export default () => {
           },
         });
       } catch (error: any) {
-        // TODO: proper error handling
-        console.error("Registration error:", error);
-        return res
-          .status(500)
-          .json({ error: "Registration failed", details: error.message });
+        _next({
+          status: 500,
+          error,
+        });
       }
     },
   );
@@ -80,25 +70,26 @@ export default () => {
   router.post(
     "/login",
     validate(loginSchema, "body"),
-    async (req: Request, res: Response): Promise<any> => {
+    async (_req: Request, res: Response, _next: NextFunction) => {
       try {
-        const { email, password } = req.body;
-
-        // Validation - add later proper validation from bonus task
-        if (!email || !password) {
-          return res
-            .status(400)
-            .json({ error: "Email and password are required" });
-        }
+        const { email, password } = _req.body;
 
         const user = await User.findOne({ where: { email } });
         if (!user) {
-          return res.status(401).json({ error: "Invalid email or password" });
+          _next({
+            status: 401,
+            message: "Unauthorized",
+          });
+          return;
         }
 
         const isPasswordValid = await user.comparePassword(password);
         if (!isPasswordValid) {
-          return res.status(401).json({ error: "Invalid email or password" });
+          _next({
+            status: 401,
+            message: "Unauthorized",
+          });
+          return;
         }
 
         const token = generateToken({
@@ -109,7 +100,7 @@ export default () => {
 
         const { password: _, ...userWithoutPassword } = user.toJSON();
 
-        return res.json({
+        res.json({
           message: "Login successful",
           data: {
             user: userWithoutPassword,
@@ -117,10 +108,10 @@ export default () => {
           },
         });
       } catch (error: any) {
-        console.error("Login error:", error);
-        return res
-          .status(500)
-          .json({ error: "Login failed", details: error.message });
+        _next({
+          status: 500,
+          error,
+        });
       }
     },
   );

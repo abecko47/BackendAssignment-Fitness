@@ -13,6 +13,7 @@ import ExerciseRouter from "./routes/exercises";
 import AuthRouter from "./routes/auth";
 import UserRouter from "./routes/users";
 import AdminRouter from "./routes/admin";
+import { errorHandler } from "./middleware/errorHandler";
 
 i18next
   .use(Backend)
@@ -38,12 +39,12 @@ app.use(express.json());
 app.use(middleware.handle(i18next));
 
 app.use("/admin", AdminRouter());
-
 app.use("/auth", AuthRouter());
 app.use("/programs", ProgramRouter());
 app.use("/exercises", ExerciseRouter());
 app.use("/users", UserRouter());
 
+app.use(errorHandler);
 const httpServer = http.createServer(app);
 
 try {

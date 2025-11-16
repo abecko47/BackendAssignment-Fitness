@@ -4,25 +4,36 @@ import completedExercisesRouter from "./completed-exercises";
 const router = Router();
 
 export default () => {
-  router.get("/", async (_req: Request, res: Response): Promise<void> => {
-    try {
-      const user = _req.user;
+  router.get(
+    "/",
+    async (
+      _req: Request,
+      res: Response,
+      _next: NextFunction,
+    ): Promise<void> => {
+      try {
+        const user = _req.user;
 
-      if (!user) {
-        res.status(401).json({ error: "Unauthorized" });
+        if (!user) {
+          _next({
+            status: 401,
+            message: "Unauthorized",
+          });
+          return;
+        }
+
+        res.json({
+          message: "Me",
+          data: user,
+        });
+      } catch (error: any) {
+        _next({
+          status: 500,
+          error,
+        });
       }
-
-      res.json({
-        message: "Me",
-        data: user,
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        error: "Failed to fetch users",
-        details: error.message,
-      });
-    }
-  });
+    },
+  );
 
   router.use("/completed-exercises", completedExercisesRouter());
 

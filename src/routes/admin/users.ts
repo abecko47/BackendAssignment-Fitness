@@ -19,36 +19,46 @@ const updateUserSchema = z.object({
 });
 
 export default () => {
-  router.get("/", async (_req: Request, res: Response): Promise<void> => {
-    try {
-      const users = await User.findAll();
+  router.get(
+    "/",
+    async (
+      _req: Request,
+      res: Response,
+      _next: NextFunction,
+    ): Promise<void> => {
+      try {
+        const users = await User.findAll();
 
-      res.json({
-        message: "List of all users",
-        data: users.map((user) => ({
-          ...user.dataValues,
-          password: undefined,
-        })),
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        error: "Failed to fetch users",
-        details: error.message,
-      });
-    }
-  });
+        res.json({
+          message: "List of all users",
+          data: users.map((user) => ({
+            ...user.dataValues,
+            password: undefined,
+          })),
+        });
+      } catch (error: any) {
+        _next({
+          status: 500,
+          error,
+        });
+      }
+    },
+  );
 
   router.get(
     "/:id",
     validate(idParamSchema, "params"),
-    async (req: Request, res: Response): Promise<void> => {
+    async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
       try {
         const { id } = req.params;
 
         const user = await User.findByPk(id);
 
         if (!user) {
-          res.status(404).json({ error: "User not found" });
+          _next({
+            status: 404,
+            message: "notFound",
+          });
           return;
         }
 
@@ -60,9 +70,9 @@ export default () => {
           },
         });
       } catch (error: any) {
-        res.status(500).json({
-          error: "Failed to fetch user",
-          details: error.message,
+        _next({
+          status: 500,
+          error,
         });
       }
     },
@@ -72,7 +82,7 @@ export default () => {
     "/:id",
     validate(idParamSchema, "params"),
     validate(updateUserSchema, "body"),
-    async (req: Request, res: Response): Promise<void> => {
+    async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
       try {
         const { id } = req.params;
         const { name, surname, nickName, age, role } = req.body;
@@ -80,7 +90,11 @@ export default () => {
         const user = await User.findByPk(id);
 
         if (!user) {
-          res.status(404).json({ error: "User not found" });
+          _next({
+            status: 404,
+            message: "notFound",
+          });
+          return;
           return;
         }
 
@@ -100,9 +114,9 @@ export default () => {
           },
         });
       } catch (error: any) {
-        res.status(500).json({
-          error: "Failed to update user",
-          details: error.message,
+        _next({
+          status: 500,
+          error,
         });
       }
     },

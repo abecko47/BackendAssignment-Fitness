@@ -11,24 +11,31 @@ router.use(authenticate, authorize(USER_ROLE.ADMIN, USER_ROLE.USER));
 const { User } = models;
 
 export default () => {
-  router.get("/", async (_req: Request, res: Response): Promise<void> => {
-    try {
-      const users = await User.findAll();
+  router.get(
+    "/",
+    async (
+      _req: Request,
+      res: Response,
+      _next: NextFunction,
+    ): Promise<void> => {
+      try {
+        const users = await User.findAll();
 
-      res.json({
-        message: "List of all users",
-        data: users.map((user) => ({
-          id: user.dataValues.id,
-          nickName: user.dataValues.nickName,
-        })),
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        error: "Failed to fetch users",
-        details: error.message,
-      });
-    }
-  });
+        res.json({
+          message: "List of all users",
+          data: users.map((user) => ({
+            id: user.dataValues.id,
+            nickName: user.dataValues.nickName,
+          })),
+        });
+      } catch (error: any) {
+        _next({
+          status: 500,
+          error,
+        });
+      }
+    },
+  );
 
   router.use("/me", meRouter());
   return router;
