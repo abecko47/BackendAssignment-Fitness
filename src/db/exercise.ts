@@ -36,6 +36,9 @@ export default (sequelize: Sequelize, modelName: string) => {
       name: {
         type: DataTypes.STRING(200),
       },
+      searchVector: {
+        type: DataTypes.VIRTUAL,
+      },
     },
     {
       paranoid: true,

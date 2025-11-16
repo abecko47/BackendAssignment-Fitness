@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
+import { Op, literal, fn, col } from "sequelize";
 
-import { models } from "../db";
+import { models, sequelize } from "../db";
 
 const router = Router();
 
@@ -18,22 +19,36 @@ export default () => {
         ? parseInt(_req.query.programID as string)
         : undefined;
 
+      const programWhereClause: any = {};
       const whereClause: any = {};
       if (programID) {
-        whereClause.id = programID;
+        programWhereClause.id = programID;
+      }
+
+      const searchString = _req.query.search as string | undefined;
+
+      if (searchString) {
+        // Full-text search using Postgres tsquery
+        whereClause[Op.and] = sequelize.where(
+          // Use `col` to reference the column in the main table
+          col("searchVector"),
+          "@@",
+          sequelize.fn("to_tsquery", "english", `${searchString}:*`),
+        );
       }
 
       const { rows: exercises, count } = await Exercise.findAndCountAll({
         include: [
           {
             model: Program,
-            where: whereClause,
+            where: programWhereClause,
             through: { attributes: [] },
             required: !!programID,
           },
         ],
         limit,
         offset,
+        where: whereClause,
         order: [["createdAt", "ASC"]],
         distinct: true,
       });
