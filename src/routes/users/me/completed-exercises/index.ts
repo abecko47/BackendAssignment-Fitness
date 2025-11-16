@@ -55,7 +55,6 @@ export default () => {
     }
   });
 
-  // DELETE /users/me/completed-exercises/:id
   router.delete("/:id", async (req: Request, res: Response) => {
     try {
       const user = req.user!;

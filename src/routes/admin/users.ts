@@ -75,7 +75,7 @@ export default () => {
       res.json({
         message: "User updated successfully",
         data: {
-          ...user,
+          ...user.dataValues,
           password: undefined,
         },
       });

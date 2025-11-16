@@ -6,7 +6,7 @@ import { USER_ROLE } from "../../utils/enums";
 import meRouter from "./me";
 
 const router = Router();
-router.use(authenticate, authorize(USER_ROLE.ADMIN, USER_ROLE.ADMIN));
+router.use(authenticate, authorize(USER_ROLE.ADMIN, USER_ROLE.USER));
 
 const { User } = models;
 
