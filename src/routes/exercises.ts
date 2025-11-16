@@ -2,14 +2,24 @@ import { Router, Request, Response, NextFunction } from "express";
 import { Op, literal, fn, col } from "sequelize";
 
 import { models, sequelize } from "../db";
+import z from "zod";
+import { validate } from "../middleware/validation";
 
 const router = Router();
 
 const { Exercise, Program } = models;
 
+const getExercisesSchema = z.object({
+  page: z.coerce.number().min(1),
+  limit: z.coerce.number().min(1),
+  programID: z.coerce.number().min(1).optional(),
+  search: z.string().min(1).optional(),
+});
+
 export default () => {
   router.get(
     "/",
+    validate(getExercisesSchema, "query"),
     async (_req: Request, res: Response, _next: NextFunction): Promise<any> => {
       const page = parseInt(_req.query.page as string) || 1;
       const limit = parseInt(_req.query.limit as string) || 10;

@@ -1,14 +1,29 @@
 import { Router, Request, Response, NextFunction } from "express";
 
 import { models } from "../../db";
+import z from "zod";
+import { idParamSchema, validate } from "../../middleware/validation";
 
 const router = Router();
 
 const { Exercise, Program } = models;
 
+const createExerciseSchema = z.object({
+  name: z.string().min(1),
+  difficulty: z.string().min(1),
+  programID: z.number().optional(),
+});
+
+const updateExerciseSchema = z.object({
+  name: z.string().min(1).optional(),
+  difficulty: z.string().min(1).optional(),
+  programID: z.number().optional(),
+});
+
 export default () => {
   router.post(
     "/",
+    validate(createExerciseSchema, "body"),
     async (
       _req: Request,
       res: Response,
@@ -54,6 +69,8 @@ export default () => {
 
   router.put(
     "/:id",
+    validate(updateExerciseSchema, "body"),
+    validate(idParamSchema, "params"),
     async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
       try {
         const { id } = req.params;
@@ -90,6 +107,7 @@ export default () => {
 
   router.delete(
     "/:id",
+    validate(idParamSchema, "params"),
     async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
       try {
         const { id } = req.params;

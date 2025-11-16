@@ -1,14 +1,22 @@
 import { Router, Request, Response, NextFunction } from "express";
 
 import { models } from "../../db";
+import z from "zod";
+import { idParamSchema, validate } from "../../middleware/validation";
 
 const router = Router();
 
 const { Program, Exercise } = models;
 
+const exercisesIdsSchema = z.object({
+  exerciseIDs: z.array(z.number()),
+});
+
 export default () => {
   router.post(
     "/:id/exercises",
+    validate(exercisesIdsSchema, "body"),
+    validate(idParamSchema, "params"),
     async (
       _req: Request,
       res: Response,
@@ -50,6 +58,8 @@ export default () => {
 
   router.delete(
     "/:id/exercises",
+    validate(exercisesIdsSchema, "body"),
+    validate(idParamSchema, "params"),
     async (req: Request, res: Response): Promise<void> => {
       try {
         const programID = req.params.id;

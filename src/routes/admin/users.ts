@@ -1,10 +1,22 @@
 import { Router, Request, Response, NextFunction } from "express";
 
 import { models } from "../../db";
+import z from "zod";
+import { USER_ROLE } from "../../utils/enums";
+import { idParamSchema, validate } from "../../middleware/validation";
 
 const router = Router();
 
 const { User } = models;
+
+const updateUserSchema = z.object({
+  name: z.string().min(1),
+  surname: z.string().min(1),
+  nickName: z.string().min(1),
+  email: z.email().min(1),
+  age: z.number(),
+  role: z.enum(Object.values(USER_ROLE)),
+});
 
 export default () => {
   router.get("/", async (_req: Request, res: Response): Promise<void> => {
@@ -26,66 +38,75 @@ export default () => {
     }
   });
 
-  router.get("/:id", async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
+  router.get(
+    "/:id",
+    validate(idParamSchema, "params"),
+    async (req: Request, res: Response): Promise<void> => {
+      try {
+        const { id } = req.params;
 
-      const user = await User.findByPk(id);
+        const user = await User.findByPk(id);
 
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
+        if (!user) {
+          res.status(404).json({ error: "User not found" });
+          return;
+        }
+
+        res.json({
+          message: "User details",
+          data: {
+            ...user.dataValues,
+            password: undefined,
+          },
+        });
+      } catch (error: any) {
+        res.status(500).json({
+          error: "Failed to fetch user",
+          details: error.message,
+        });
       }
+    },
+  );
 
-      res.json({
-        message: "User details",
-        data: {
-          ...user.dataValues,
-          password: undefined,
-        },
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        error: "Failed to fetch user",
-        details: error.message,
-      });
-    }
-  });
+  router.put(
+    "/:id",
+    validate(idParamSchema, "params"),
+    validate(updateUserSchema, "body"),
+    async (req: Request, res: Response): Promise<void> => {
+      try {
+        const { id } = req.params;
+        const { name, surname, nickName, age, role } = req.body;
 
-  router.put("/:id", async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { name, surname, nickName, age, role } = req.body;
+        const user = await User.findByPk(id);
 
-      const user = await User.findByPk(id);
+        if (!user) {
+          res.status(404).json({ error: "User not found" });
+          return;
+        }
 
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
+        await user.update({
+          ...(name && { name }),
+          ...(surname && { surname }),
+          ...(nickName && { nickName }),
+          ...(age && { age }),
+          ...(role && { role }),
+        });
+
+        res.json({
+          message: "User updated successfully",
+          data: {
+            ...user.dataValues,
+            password: undefined,
+          },
+        });
+      } catch (error: any) {
+        res.status(500).json({
+          error: "Failed to update user",
+          details: error.message,
+        });
       }
-
-      await user.update({
-        ...(name && { name }),
-        ...(surname && { surname }),
-        ...(nickName && { nickName }),
-        ...(age && { age }),
-        ...(role && { role }),
-      });
-
-      res.json({
-        message: "User updated successfully",
-        data: {
-          ...user.dataValues,
-          password: undefined,
-        },
-      });
-    } catch (error: any) {
-      res.status(500).json({
-        error: "Failed to update user",
-        details: error.message,
-      });
-    }
-  });
+    },
+  );
 
   return router;
 };

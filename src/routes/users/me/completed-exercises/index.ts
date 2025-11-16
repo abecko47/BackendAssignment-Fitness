@@ -1,10 +1,18 @@
 import { Router, Request, Response, NextFunction } from "express";
 
 import { models } from "../../../../db";
+import z from "zod";
+import { idParamSchema, validate } from "../../../../middleware/validation";
 
 const router = Router();
 
 const { UserExerciseCompletion, Exercise } = models;
+
+const completedExerciseSchema = z.object({
+  exerciseID: z.number().min(1),
+  durationSeconds: z.number().min(1),
+  completedAt: z.date().optional(),
+});
 
 export default () => {
   router.get("/", async (req: Request, res: Response) => {
@@ -25,59 +33,67 @@ export default () => {
     }
   });
 
-  router.post("/", async (req: Request, res: Response) => {
-    try {
-      const user = req.user!;
-      const { exerciseID, durationSeconds, completedAt } = req.body;
+  router.post(
+    "/",
+    validate(completedExerciseSchema, "body"),
+    async (req: Request, res: Response) => {
+      try {
+        const user = req.user!;
+        const { exerciseID, durationSeconds, completedAt } = req.body;
 
-      if (!exerciseID || !durationSeconds) {
+        if (!exerciseID || !durationSeconds) {
+          res
+            .status(400)
+            .json({ error: "exerciseID and durationSeconds are required" });
+          return;
+        }
+
+        const exercise = await Exercise.findByPk(exerciseID);
+        if (!exercise) res.status(404).json({ error: "Exercise not found" });
+
+        const completion = await UserExerciseCompletion.create({
+          userID: user.id,
+          exerciseID,
+          durationSeconds,
+          completedAt: completedAt ? new Date(completedAt) : new Date(),
+        });
+
+        res.json({ message: "Exercise tracked", data: completion });
+      } catch (err: any) {
         res
-          .status(400)
-          .json({ error: "exerciseID and durationSeconds are required" });
-        return;
+          .status(500)
+          .json({ error: "Failed to track exercise", details: err.message });
       }
+    },
+  );
 
-      const exercise = await Exercise.findByPk(exerciseID);
-      if (!exercise) res.status(404).json({ error: "Exercise not found" });
+  router.delete(
+    "/:id",
+    validate(idParamSchema, "params"),
+    async (req: Request, res: Response) => {
+      try {
+        const user = req.user!;
+        const { id } = req.params;
 
-      const completion = await UserExerciseCompletion.create({
-        userID: user.id,
-        exerciseID,
-        durationSeconds,
-        completedAt: completedAt ? new Date(completedAt) : new Date(),
-      });
+        const completion = await UserExerciseCompletion.findOne({
+          where: { id, userID: user.id },
+        });
 
-      res.json({ message: "Exercise tracked", data: completion });
-    } catch (err: any) {
-      res
-        .status(500)
-        .json({ error: "Failed to track exercise", details: err.message });
-    }
-  });
+        if (!completion) {
+          res.status(404).json({ error: "Tracked exercise not found" });
+          return;
+        }
 
-  router.delete("/:id", async (req: Request, res: Response) => {
-    try {
-      const user = req.user!;
-      const { id } = req.params;
-
-      const completion = await UserExerciseCompletion.findOne({
-        where: { id, userID: user.id },
-      });
-
-      if (!completion) {
-        res.status(404).json({ error: "Tracked exercise not found" });
-        return;
+        await completion.destroy();
+        res.json({ message: "Tracked exercise removed", data: { id } });
+      } catch (err: any) {
+        res.status(500).json({
+          error: "Failed to remove tracked exercise",
+          details: err.message,
+        });
       }
-
-      await completion.destroy();
-      res.json({ message: "Tracked exercise removed", data: { id } });
-    } catch (err: any) {
-      res.status(500).json({
-        error: "Failed to remove tracked exercise",
-        details: err.message,
-      });
-    }
-  });
+    },
+  );
 
   return router;
 };

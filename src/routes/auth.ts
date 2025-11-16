@@ -1,13 +1,34 @@
 import { Router, Request, Response } from "express";
+import { z } from "zod";
+
 import { models } from "../db";
 import { generateToken } from "../auth/jwt";
+import { USER_ROLE } from "../utils/enums";
+import { validate } from "../middleware/validation";
 
 const router = Router();
 const { User } = models;
 
+const registerSchema = z.object({
+  name: z.string().min(1),
+  surname: z.string().min(1),
+  nickName: z.string().min(1),
+  email: z.email().min(1),
+  age: z.number(),
+  password: z.string().min(1),
+  role: z.enum(Object.values(USER_ROLE)),
+});
+
+const loginSchema = z.object({
+  name: z.string().min(1),
+  email: z.email().min(1),
+  password: z.string().min(1),
+});
+
 export default () => {
   router.post(
     "/register",
+    validate(registerSchema, "body"),
     async (req: Request, res: Response): Promise<any> => {
       try {
         const { name, surname, nickName, email, age, password, role } =
@@ -56,49 +77,53 @@ export default () => {
     },
   );
 
-  router.post("/login", async (req: Request, res: Response): Promise<any> => {
-    try {
-      const { email, password } = req.body;
+  router.post(
+    "/login",
+    validate(loginSchema, "body"),
+    async (req: Request, res: Response): Promise<any> => {
+      try {
+        const { email, password } = req.body;
 
-      // Validation - add later proper validation from bonus task
-      if (!email || !password) {
+        // Validation - add later proper validation from bonus task
+        if (!email || !password) {
+          return res
+            .status(400)
+            .json({ error: "Email and password are required" });
+        }
+
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+          return res.status(401).json({ error: "Invalid email or password" });
+        }
+
+        const isPasswordValid = await user.comparePassword(password);
+        if (!isPasswordValid) {
+          return res.status(401).json({ error: "Invalid email or password" });
+        }
+
+        const token = generateToken({
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        });
+
+        const { password: _, ...userWithoutPassword } = user.toJSON();
+
+        return res.json({
+          message: "Login successful",
+          data: {
+            user: userWithoutPassword,
+            token,
+          },
+        });
+      } catch (error: any) {
+        console.error("Login error:", error);
         return res
-          .status(400)
-          .json({ error: "Email and password are required" });
+          .status(500)
+          .json({ error: "Login failed", details: error.message });
       }
-
-      const user = await User.findOne({ where: { email } });
-      if (!user) {
-        return res.status(401).json({ error: "Invalid email or password" });
-      }
-
-      const isPasswordValid = await user.comparePassword(password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: "Invalid email or password" });
-      }
-
-      const token = generateToken({
-        id: user.id,
-        email: user.email,
-        role: user.role,
-      });
-
-      const { password: _, ...userWithoutPassword } = user.toJSON();
-
-      return res.json({
-        message: "Login successful",
-        data: {
-          user: userWithoutPassword,
-          token,
-        },
-      });
-    } catch (error: any) {
-      console.error("Login error:", error);
-      return res
-        .status(500)
-        .json({ error: "Login failed", details: error.message });
-    }
-  });
+    },
+  );
 
   return router;
 };
