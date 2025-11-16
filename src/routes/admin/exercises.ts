@@ -1,8 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
 
 import { models } from "../../db";
-import { authenticate, authorize } from "../../middleware/auth";
-import { USER_ROLE } from "../../utils/enums";
 
 const router = Router();
 
@@ -25,7 +23,6 @@ export default () => {
         });
 
         if (programID) {
-          const programToAssign = await Program.findByPk(programID);
           await exercise.addPrograms(programID);
 
           const exerciseWithPrograms = await Exercise.findByPk(exercise.id, {
