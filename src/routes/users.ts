@@ -12,14 +12,17 @@ export default () => {
   router.get(
     "/",
     authenticate,
-    authorize(USER_ROLE.ADMIN),
+    authorize(USER_ROLE.ADMIN, USER_ROLE.USER),
     async (_req: Request, res: Response): Promise<void> => {
       try {
         const users = await User.findAll();
 
         res.json({
           message: "List of all users",
-          data: users,
+          data: users.map((user) => ({
+            ...user.dataValues,
+            password: undefined,
+          })),
         });
       } catch (error: any) {
         res.status(500).json({
@@ -33,7 +36,7 @@ export default () => {
   router.get(
     "/:id",
     authenticate,
-    authorize(USER_ROLE.ADMIN),
+    authorize(USER_ROLE.ADMIN, USER_ROLE.USER),
     async (req: Request, res: Response): Promise<void> => {
       try {
         const { id } = req.params;
@@ -47,7 +50,10 @@ export default () => {
 
         res.json({
           message: "User details",
-          data: user,
+          data: {
+            ...user.dataValues,
+            password: undefined,
+          },
         });
       } catch (error: any) {
         res.status(500).json({
@@ -84,7 +90,10 @@ export default () => {
 
         res.json({
           message: "User updated successfully",
-          data: user,
+          data: {
+            ...user,
+            password: undefined,
+          },
         });
       } catch (error: any) {
         res.status(500).json({
