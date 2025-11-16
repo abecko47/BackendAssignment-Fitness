@@ -36,6 +36,7 @@ export default () => {
             message: "Successfully created exercise",
             data: exerciseWithPrograms,
           });
+          return;
         }
 
         // status 200, because I return resource straight away
@@ -71,6 +72,7 @@ export default () => {
 
         if (!affectedRows) {
           res.status(404).json({ error: "Exercise not found" });
+          return;
         }
 
         res.json({
@@ -101,6 +103,7 @@ export default () => {
 
         if (!exercise) {
           res.status(404).json({ error: "Exercise not found" });
+          return;
         }
 
         res.json({
