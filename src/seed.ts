@@ -7,8 +7,6 @@ import { EXERCISE_DIFFICULTY, USER_ROLE } from "./utils/enums";
 const { Exercise, Program, User } = models;
 
 const seedDB = async () => {
-  await sequelize.sync({ force: true });
-
   const programs = await Program.bulkCreate(
     [{ name: "Program 1" }, { name: "Program 2" }, { name: "Program 3" }],
     { returning: true },

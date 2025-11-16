@@ -68,10 +68,17 @@
 							]
 						},
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "language",
+								"value": "en",
+								"type": "text",
+								"disabled": true
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Test\",\n    \"difficulty\": \"EASY\",\n    \"programID\": \"2\"\n}",
+							"raw": "{\n    \"name\": \"Test\",\n    \"difficulty\": \"EASY\",\n    \"programID\": 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -110,7 +117,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Test\",\n    \"difficulty\": \"EASY\",\n    \"programID\": \"1\"\n}",
+							"raw": "{\n    \"name\": \"Test\",\n    \"difficulty\": \"EASY\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -118,7 +125,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8000/admin/exercises/2",
+							"raw": "http://localhost:8000/admin/exercises/9",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -127,7 +134,7 @@
 							"path": [
 								"admin",
 								"exercises",
-								"2"
+								"9"
 							]
 						}
 					},
@@ -349,7 +356,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Tolya\",\n    \"surname\": \"Admin\",\n    \"nickName\": \"jasdasd\",\n    \"email\": \"lalal@gmail.com\",\n    \"age\": 25,\n    \"role\": \"ADMIN\",\n    \"password\": \"pass123\"\n}",
+							"raw": "{\n    \"name\": \"Tolya\",\n    \"nickName\": \"jasdasd\",\n    \"email\": \"lalal@ssgmail.com\",\n    \"age\": 25,\n    \"role\": \"ADMIN\",\n    \"password\": \"pass123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -403,7 +410,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"john.user@example.com\",\n    \"password\": \"password123\"\n}",
+							"raw": "{\n    \"email\": \"john.admin@example.com\",\n    \"password\": \"password123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -619,7 +626,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8000/exercises",
+					"raw": "http://localhost:8000/exercises?page=1&limit=2&programID=1&search=exe",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -627,6 +634,24 @@
 					"port": "8000",
 					"path": [
 						"exercises"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "2"
+						},
+						{
+							"key": "programID",
+							"value": "1"
+						},
+						{
+							"key": "search",
+							"value": "exe"
+						}
 					]
 				}
 			},

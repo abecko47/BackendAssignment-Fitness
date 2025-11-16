@@ -17,7 +17,6 @@ const createExerciseSchema = z.object({
 const updateExerciseSchema = z.object({
   name: z.string().min(1).optional(),
   difficulty: z.string().min(1).optional(),
-  programID: z.number().optional(),
 });
 
 export default () => {

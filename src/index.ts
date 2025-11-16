@@ -47,12 +47,6 @@ app.use("/users", UserRouter());
 app.use(errorHandler);
 const httpServer = http.createServer(app);
 
-try {
-  sequelize.sync();
-} catch (error) {
-  console.log("Sequelize sync error");
-}
-
 httpServer
   .listen(8000)
   .on("listening", () => console.log(`Server started at port ${8000}`));
